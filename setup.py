@@ -40,7 +40,6 @@ setup(
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
-        'Framework :: Django',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Programming Language :: Python',
