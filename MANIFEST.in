@@ -1,0 +1,2 @@
+include README.rst LICENCE requirements.txt
+recursive-exclude rache *.pyc
