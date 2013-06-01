@@ -1,6 +1,10 @@
 RACHE
 =====
 
+.. image:: https://travis-ci.org/brutasse/rache.png?branch=master
+   :alt: Build Status
+   :target: https://travis-ci.org/brutasse/rache
+
 A scheduler backed by `Redis`_ with a very simple interface.
 
 .. _Redis: http://redis.io/
