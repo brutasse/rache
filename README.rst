@@ -81,7 +81,7 @@ without rescheduling it.
 
 ::
 
-    jobs = pending_jobs(reschedule_in=None)
+    jobs = pending_jobs(reschedule_in=None, limit=None)
 
 (the returned value is a generator)
 
@@ -105,6 +105,9 @@ jobs according to their results (``enqueue`` is `rq`_-style syntax)::
             schedule_job(kwargs['id'], schedule_in=3600 * 24 * 30)
 
 .. _rq: http://python-rq.org/
+
+``limit`` allows you to limit the number of jobs returned. Remaining jobs are
+left on schedule, even if they should have been scheduled right now.
 
 ``delete_job``
 ``````````````
