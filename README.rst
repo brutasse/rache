@@ -115,6 +115,16 @@ jobs according to their results (``enqueue`` is `rq`_-style syntax)::
 
 Removes a job completely from the scheduler.
 
+``job_details``
+```````````````
+
+::
+
+    job_details('<job id>')
+
+Returns a dictionnary with the job data. The job ID and scheduled time are
+set in the ``id`` and ``schedule_at`` keys of the returned value.
+
 ``scheduled_jobs``
 ``````````````````
 
@@ -148,3 +158,18 @@ Or for all supported python versions::
     tox
 
 Hack, fix bugs and submit pull requests!
+
+Changelog
+---------
+
+* **0.2** (2013-01-02):
+
+  * Added ``limit`` kwarg to ``pending_jobs()``.
+  * Allowed ``schedule_in`` to be a timedelta alternatively to a number of
+    seconds.
+  * Added ``job_details()``.
+  * Numerical data attached to jobs is cast to ``int()`` when returned.
+
+* **0.1** (2013-01-01):
+
+  * Initial release

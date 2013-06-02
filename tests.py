@@ -2,10 +2,13 @@
 from __future__ import unicode_literals
 
 import sys
+import time
 import unittest
 
-from rache import (r, schedule_job, delete_job, pending_jobs, scheduled_jobs,
-                   REDIS_PREFIX)
+from datetime import timedelta
+
+from rache import (schedule_job, delete_job, pending_jobs, scheduled_jobs,
+                   job_details, r, REDIS_PREFIX)
 
 
 if sys.version_info < (2, 7):
@@ -78,7 +81,7 @@ class APITests(ClearRedisTestCase):
                      thing='blah blah')
         jobs = list(pending_jobs())
         self.assertEqual(jobs, [{'id': 'foobar', 'attr': 'stuff',
-                                 'other': '12', 'thing': 'blah blah'}])
+                                 'other': 12, 'thing': 'blah blah'}])
 
         schedule_job('foobar', schedule_in=-1, attr=None, other=None,
                      thing='blah blah')
@@ -92,3 +95,24 @@ class APITests(ClearRedisTestCase):
     def test_schedule_with_id(self):
         with self.assertRaises(RuntimeError):
             schedule_job('testing', schedule_in=1, id=12)
+
+    def test_schedule_limit_items_count(self):
+        for i in range(100):
+            schedule_job(i, schedule_in=-1)
+
+        jobs = list(pending_jobs(limit=10))
+        self.assertEqual(len(jobs), 10)
+        self.assertEqual(len(list(scheduled_jobs())), 90)
+
+    def test_schedule_with_timedelta(self):
+        schedule_job('delta', schedule_in=timedelta(seconds=-1))
+
+    def test_job_details(self):
+        schedule_job('details', schedule_in=-1, stuff='baz', other=123)
+
+        self.assertEqual(job_details('details'), {
+            'id': 'details',
+            'stuff': 'baz',
+            'schedule_at': int(time.time()) - 1,
+            'other': 123,
+        })

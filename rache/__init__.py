@@ -24,11 +24,27 @@ def job_key(job_id):
     return '{0}job:{1}'.format(REDIS_PREFIX, job_id).encode('utf-8')
 
 
+def job_details(job_id):
+    """Returns the job data with its scheduled timestamp.
+
+    :param job_id: the ID of the job to retrieve."""
+    data = r.hgetall(job_key(job_id))
+
+    job_data = {'id': job_id, 'schedule_at': int(r.zscore(REDIS_KEY, job_id))}
+    for key, value in data.items():
+        decoded = value.decode('utf-8')
+        if decoded.isdigit():
+            decoded = int(decoded)
+        job_data[key.decode('utf-8')] = decoded
+    return job_data
+
+
 def schedule_job(job_id, schedule_in, **kwargs):
     """Schedules a job.
 
     :param job_id: unique identifier for this job
-    :param schedule_in: number of seconds from now in which to schedule the job
+    :param schedule_in: number of seconds from now in which to schedule the
+    job or timedelta object.
 
     :param **kwargs: parameters to attach to the job, key-value structure.
 
@@ -36,6 +52,8 @@ def schedule_job(job_id, schedule_in, **kwargs):
 
     >>> schedule_job('http://example.com/test', schedule_in=10, num_retries=10)
     """
+    if not isinstance(schedule_in, int):  # assumed to be a timedelta
+        schedule_in = schedule_in.days * 3600 * 24 + schedule_in.seconds
     schedule_at = int(time.time()) + schedule_in
 
     if 'id' in kwargs:
@@ -71,13 +89,17 @@ def delete_job(job_id):
         pipe.execute()
 
 
-def pending_jobs(reschedule_in=None):
+def pending_jobs(reschedule_in=None, limit=None):
     """Gets the job needing execution.
 
     :param reschedule_in: number of seconds in which returned jobs should be
     auto-rescheduled. If set to None (default), jobs are not auto-rescheduled.
+    :param limit: max number of jobs to retrieve. If set to None (default),
+    retrieves all pending jobs with no limit.
     """
-    job_ids = r.zrangebyscore(REDIS_KEY, 0, int(time.time()))
+    start = None if limit is None else 0
+    job_ids = r.zrangebyscore(REDIS_KEY, 0, int(time.time()),
+                              start=start, num=limit)
 
     with r.pipeline() as pipe:
         if reschedule_in is None:
@@ -96,7 +118,10 @@ def pending_jobs(reschedule_in=None):
     for job_id, data in izip(job_ids, jobs):
         job_data = {'id': job_id.decode('utf-8')}
         for key, value in data.items():
-            job_data[key.decode('utf-8')] = value.decode('utf-8')
+            decoded = value.decode('utf-8')
+            if decoded.isdigit():
+                decoded = int(decoded)
+            job_data[key.decode('utf-8')] = decoded
         yield job_data
 
 
