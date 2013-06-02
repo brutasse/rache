@@ -162,7 +162,7 @@ Hack, fix bugs and submit pull requests!
 Changelog
 ---------
 
-* **0.2** (2013-01-02):
+* **0.2** (2013-06-02):
 
   * Added ``limit`` kwarg to ``pending_jobs()``.
   * Allowed ``schedule_in`` to be a timedelta alternatively to a number of
@@ -170,6 +170,6 @@ Changelog
   * Added ``job_details()``.
   * Numerical data attached to jobs is cast to ``int()`` when returned.
 
-* **0.1** (2013-01-01):
+* **0.1** (2013-06-01):
 
   * Initial release
