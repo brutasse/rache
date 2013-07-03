@@ -88,6 +88,12 @@ class APITests(ClearRedisTestCase):
         jobs = list(pending_jobs())
         self.assertEqual(jobs, [{'id': 'foobar', 'thing': 'blah blah'}])
 
+    def test_schedule_non_unicode_data(self):
+        schedule_job('bad', schedule_in=-1,
+                     etag=b'2013/6/29 \xa4W\xa4\xc8 09:51:31')
+        job = list(pending_jobs())[0]
+        self.assertEqual(job['etag'], b'2013/6/29 \xa4W\xa4\xc8 09:51:31')
+
     def test_schedule_without_delay(self):
         with self.assertRaises(TypeError):
             schedule_job('trololol')

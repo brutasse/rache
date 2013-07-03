@@ -165,6 +165,11 @@ Hack, fix bugs and submit pull requests!
 Changelog
 ---------
 
+* **0.2.1** (2013-07-03):
+
+  * Allowed ``pending_jobs()`` to return non-unicode data if undecodable bytes
+    are passed to ``schedule_job()``.
+
 * **0.2** (2013-06-02):
 
   * Added ``limit`` kwarg to ``pending_jobs()``.

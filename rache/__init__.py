@@ -32,7 +32,10 @@ def job_details(job_id):
 
     job_data = {'id': job_id, 'schedule_at': int(r.zscore(REDIS_KEY, job_id))}
     for key, value in data.items():
-        decoded = value.decode('utf-8')
+        try:
+            decoded = value.decode('utf-8')
+        except UnicodeDecodeError:
+            decoded = decoded
         if decoded.isdigit():
             decoded = int(decoded)
         job_data[key.decode('utf-8')] = decoded
@@ -118,7 +121,10 @@ def pending_jobs(reschedule_in=None, limit=None):
     for job_id, data in izip(job_ids, jobs):
         job_data = {'id': job_id.decode('utf-8')}
         for key, value in data.items():
-            decoded = value.decode('utf-8')
+            try:
+                decoded = value.decode('utf-8')
+            except UnicodeDecodeError:
+                decoded = value
             if decoded.isdigit():
                 decoded = int(decoded)
             job_data[key.decode('utf-8')] = decoded
