@@ -165,6 +165,10 @@ Hack, fix bugs and submit pull requests!
 Changelog
 ---------
 
+* **0.2.2** (2013-07-10):
+
+  * Fixed a typo that lead to ``AttributeError`` when retrieving some jobs.
+
 * **0.2.1** (2013-07-03):
 
   * Allowed ``pending_jobs()`` to return non-unicode data if undecodable bytes
