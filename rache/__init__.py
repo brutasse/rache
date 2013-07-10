@@ -35,7 +35,7 @@ def job_details(job_id):
         try:
             decoded = value.decode('utf-8')
         except UnicodeDecodeError:
-            decoded = decoded
+            decoded = value
         if decoded.isdigit():
             decoded = int(decoded)
         job_data[key.decode('utf-8')] = decoded
