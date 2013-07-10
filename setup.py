@@ -29,7 +29,7 @@ def get_version():
 setup(
     name='rache',
     version=get_version(),
-    author='Bruno Renie',
+    author='Bruno Renié',
     author_email='bruno@renie.fr',
     packages=find_packages(),
     include_package_data=True,
