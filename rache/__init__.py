@@ -51,8 +51,6 @@ def schedule_job(job_id, schedule_in, **kwargs):
 
     :param **kwargs: parameters to attach to the job, key-value structure.
 
-    schedule_at and schedule_in are mutually exclusive.
-
     >>> schedule_job('http://example.com/test', schedule_in=10, num_retries=10)
     """
     if not isinstance(schedule_in, int):  # assumed to be a timedelta
