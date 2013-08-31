@@ -58,7 +58,7 @@ Usage
 
 ::
 
-    schedule_job('job id', schedule_in=<seconds>, **kwargs)
+    schedule_job('job id', schedule_in=<seconds>, connection=None, **kwargs)
 
 A given job ID is unique from the scheduler perspective. Scheduling it twice
 results in it being scheduled at the time decided in the last call.
@@ -76,12 +76,16 @@ The job data is persistent. To remove a key from the data, call
 ``schedule_in`` is mandatory. This means you can't update an existing job
 without rescheduling it.
 
+``connection`` allows you to pass a custom Redis connection object. This is
+useful if you have your own connection pooling and want to manage connections
+yourself.
+
 ``pending_jobs``
 ````````````````
 
 ::
 
-    jobs = pending_jobs(reschedule_in=None, limit=None)
+    jobs = pending_jobs(reschedule_in=None, limit=None, connection=None)
 
 (the returned value is a generator)
 
@@ -109,31 +113,37 @@ jobs according to their results (``enqueue`` is `rq`_-style syntax)::
 ``limit`` allows you to limit the number of jobs returned. Remaining jobs are
 left on schedule, even if they should have been scheduled right now.
 
+``connection`` allows you to pass a custom Redis connection object.
+
 ``delete_job``
 ``````````````
 
 ::
 
-    delete_job('<job id>')
+    delete_job('<job id>', connection=None)
 
 Removes a job completely from the scheduler.
+
+``connection`` allows you to pass a custom Redis connection object.
 
 ``job_details``
 ```````````````
 
 ::
 
-    job_details('<job id>')
+    job_details('<job id>', connection=None)
 
 Returns a dictionnary with the job data. The job ID and scheduled time are
 set in the ``id`` and ``schedule_at`` keys of the returned value.
+
+``connection`` allows you to pass a custom Redis connection object.
 
 ``scheduled_jobs``
 ``````````````````
 
 ::
 
-    scheduled_jobs(with_times=False)
+    scheduled_jobs(with_times=False, connection=None)
 
 (the returned value is a generator)
 
@@ -142,6 +152,8 @@ a list of ``(job_id, timestamp)`` tuples if ``with_times`` is set to ``True``.
 
 This is useful for syncing jobs between the scheduler and a database, for
 instance.
+
+``connection`` allows you to pass a custom Redis connection object.
 
 Contributing
 ------------

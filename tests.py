@@ -122,3 +122,10 @@ class APITests(ClearRedisTestCase):
             'schedule_at': int(time.time()) - 1,
             'other': 123,
         })
+
+    def test_custom_connection(self):
+        for i in range(10):
+            schedule_job(i, schedule_in=-1, connection=r)
+
+        jobs = list(pending_jobs(connection=r))
+        self.assertEqual(len(jobs), 10)

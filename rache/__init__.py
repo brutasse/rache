@@ -24,13 +24,16 @@ def job_key(job_id):
     return '{0}job:{1}'.format(REDIS_PREFIX, job_id).encode('utf-8')
 
 
-def job_details(job_id):
+def job_details(job_id, connection=None):
     """Returns the job data with its scheduled timestamp.
 
     :param job_id: the ID of the job to retrieve."""
-    data = r.hgetall(job_key(job_id))
+    if connection is None:
+        connection = r
+    data = connection.hgetall(job_key(job_id))
 
-    job_data = {'id': job_id, 'schedule_at': int(r.zscore(REDIS_KEY, job_id))}
+    job_data = {'id': job_id, 'schedule_at': int(connection.zscore(REDIS_KEY,
+                                                                   job_id))}
     for key, value in data.items():
         try:
             decoded = value.decode('utf-8')
@@ -42,7 +45,7 @@ def job_details(job_id):
     return job_data
 
 
-def schedule_job(job_id, schedule_in, **kwargs):
+def schedule_job(job_id, schedule_in, connection=None, **kwargs):
     """Schedules a job.
 
     :param job_id: unique identifier for this job
@@ -57,10 +60,13 @@ def schedule_job(job_id, schedule_in, **kwargs):
         schedule_in = schedule_in.days * 3600 * 24 + schedule_in.seconds
     schedule_at = int(time.time()) + schedule_in
 
+    if connection is None:
+        connection = r
+
     if 'id' in kwargs:
         raise RuntimeError("'id' is a reserved key for the job ID")
 
-    with r.pipeline() as pipe:
+    with connection.pipeline() as pipe:
         if schedule_at is not None:
             pipe.zadd(REDIS_KEY, schedule_at, job_id)
         delete = []
@@ -77,20 +83,22 @@ def schedule_job(job_id, schedule_in, **kwargs):
         pipe.execute()
 
 
-def delete_job(job_id):
+def delete_job(job_id, connection=None):
     """Deletes a job.
 
     :param job_id: unique identifier for this job
 
     >>> delete_job('http://example.com/test')
     """
-    with r.pipeline() as pipe:
+    if connection is None:
+        connection = r
+    with connection.pipeline() as pipe:
         pipe.delete(job_key(job_id))
         pipe.zrem(REDIS_KEY, job_id)
         pipe.execute()
 
 
-def pending_jobs(reschedule_in=None, limit=None):
+def pending_jobs(reschedule_in=None, limit=None, connection=None):
     """Gets the job needing execution.
 
     :param reschedule_in: number of seconds in which returned jobs should be
@@ -98,11 +106,13 @@ def pending_jobs(reschedule_in=None, limit=None):
     :param limit: max number of jobs to retrieve. If set to None (default),
     retrieves all pending jobs with no limit.
     """
+    if connection is None:
+        connection = r
     start = None if limit is None else 0
-    job_ids = r.zrangebyscore(REDIS_KEY, 0, int(time.time()),
-                              start=start, num=limit)
+    job_ids = connection.zrangebyscore(REDIS_KEY, 0, int(time.time()),
+                                       start=start, num=limit)
 
-    with r.pipeline() as pipe:
+    with connection.pipeline() as pipe:
         if reschedule_in is None:
             for job_id in job_ids:
                 pipe.zrem(REDIS_KEY, job_id)
@@ -112,7 +122,7 @@ def pending_jobs(reschedule_in=None, limit=None):
                 pipe.zadd(REDIS_KEY, schedule_at, job_id)
         pipe.execute()
 
-    with r.pipeline() as pipe:
+    with connection.pipeline() as pipe:
         for job_id in job_ids:
             pipe.hgetall(job_key(job_id.decode('utf-8')))
         jobs = pipe.execute()
@@ -129,13 +139,16 @@ def pending_jobs(reschedule_in=None, limit=None):
         yield job_data
 
 
-def scheduled_jobs(with_times=False):
+def scheduled_jobs(with_times=False, connection=None):
     """Gets all jobs in the scheduler.
 
     :param with_times: whether to return tuples with (job_id, timestamp) or
     just job_id as a list of strings.
     """
-    jobs = r.zrangebyscore(REDIS_KEY, 0, sys.maxsize, withscores=with_times)
+    if connection is None:
+        connection = r
+    jobs = connection.zrangebyscore(REDIS_KEY, 0, sys.maxsize,
+                                    withscores=with_times)
     for job in jobs:
         if with_times:
             yield job[0].decode('utf-8'), job[1]
