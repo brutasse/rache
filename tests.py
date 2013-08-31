@@ -7,8 +7,10 @@ import unittest
 
 from datetime import timedelta
 
+import redis
+
 from rache import (schedule_job, delete_job, pending_jobs, scheduled_jobs,
-                   job_details, r, REDIS_PREFIX)
+                   job_details, r, REDIS_PREFIX, REDIS)
 
 
 if sys.version_info < (2, 7):
@@ -126,6 +128,14 @@ class APITests(ClearRedisTestCase):
     def test_custom_connection(self):
         for i in range(10):
             schedule_job(i, schedule_in=-1, connection=r)
+
+        jobs = list(pending_jobs(connection=r))
+        self.assertEqual(len(jobs), 10)
+
+    def test_legacy_redis(self):
+        connection = redis.Redis(**REDIS)
+        for i in range(10):
+            schedule_job(i, schedule_in=-1, connection=connection)
 
         jobs = list(pending_jobs(connection=r))
         self.assertEqual(len(jobs), 10)

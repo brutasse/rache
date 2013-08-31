@@ -68,7 +68,11 @@ def schedule_job(job_id, schedule_in, connection=None, **kwargs):
 
     with connection.pipeline() as pipe:
         if schedule_at is not None:
-            pipe.zadd(REDIS_KEY, schedule_at, job_id)
+            args = (schedule_at, job_id)
+            if isinstance(connection, redis.Redis):
+                # StrictRedis or Redis don't have the same argument order
+                args = (job_id, schedule_at)
+            pipe.zadd(REDIS_KEY, *args)
         delete = []
         hmset = {}
         for key, value in kwargs.items():
