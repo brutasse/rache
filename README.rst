@@ -177,6 +177,11 @@ Hack, fix bugs and submit pull requests!
 Changelog
 ---------
 
+* **0.3** (2013-08-31):
+
+  * Allow passing custom Redis connection objects for fine control on open
+    connections.
+
 * **0.2.2** (2013-07-10):
 
   * Fixed a typo that lead to ``AttributeError`` when retrieving some jobs.
