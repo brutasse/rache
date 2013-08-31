@@ -106,7 +106,7 @@ class APITests(ClearRedisTestCase):
 
     def test_schedule_limit_items_count(self):
         for i in range(100):
-            schedule_job(i, schedule_in=-1)
+            schedule_job('foo{0}'.format(i), schedule_in=-1)
 
         jobs = list(pending_jobs(limit=10))
         self.assertEqual(len(jobs), 10)
@@ -127,7 +127,7 @@ class APITests(ClearRedisTestCase):
 
     def test_custom_connection(self):
         for i in range(10):
-            schedule_job(i, schedule_in=-1, connection=r)
+            schedule_job('foo{0}'.format(i), schedule_in=-1, connection=r)
 
         jobs = list(pending_jobs(connection=r))
         self.assertEqual(len(jobs), 10)
@@ -135,7 +135,11 @@ class APITests(ClearRedisTestCase):
     def test_legacy_redis(self):
         connection = redis.Redis(**REDIS)
         for i in range(10):
-            schedule_job(i, schedule_in=-1, connection=connection)
+            schedule_job('foo{0}'.format(i), schedule_in=-1,
+                         connection=connection)
 
-        jobs = list(pending_jobs(connection=r))
+        jobs = list(pending_jobs(connection=connection, reschedule_in=-1))
+        self.assertEqual(len(jobs), 10)
+
+        jobs = list(pending_jobs(connection=r, reschedule_in=-1))
         self.assertEqual(len(jobs), 10)

@@ -177,6 +177,11 @@ Hack, fix bugs and submit pull requests!
 Changelog
 ---------
 
+* **0.3.1** (2013-08-31):
+
+  * Made ``pending_jobs`` work correctly with both ``Redis`` and
+    ``StrictRedis`` clients.
+
 * **0.3** (2013-08-31):
 
   * Allow passing custom Redis connection objects for fine control on open
