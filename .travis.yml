@@ -1,19 +1,18 @@
 language: python
+python: 3.4
+sudo: false
 services:
   - redis-server
-python:
-  - "2.6"
-  - "2.7"
-  - "3.2"
-  - "3.3"
+env:
+  - TOXENV=py26
+  - TOXENV=py27
+  - TOXENV=py33
+  - TOXENV=py34
+  - TOXENV=lint
 install:
-  - pip install tox flake8
-  - (python --version 2>&1 | grep -q "Python 2.6" && pip install unittest2) || echo
-before_script:
-  - flake8 rache
-  - flake8 tests.py
+  - pip install tox
 script:
-  - python setup.py test
+  - tox -e $TOXENV
 branches:
   only:
     - master
