@@ -13,11 +13,6 @@ with open('requirements.txt') as reqs:
                                                      line.startswith('--'))
     ]
 
-test_require = []
-if sys.version_info < (2, 7):
-    test_require.append('unittest2')
-
-
 def get_version():
     with open('rache/version.py') as f:
         __version__ = None
@@ -52,6 +47,5 @@ setup(
     ],
     zip_safe=False,
     install_requires=install_requires,
-    test_require=test_require,
     test_suite='tests',
 )
